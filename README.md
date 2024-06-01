@@ -3,8 +3,6 @@
 
 # _ESP32 CAM_
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
-
 This is the simple example how to use ESP32_CAM. 
 
 ## Prerequisites
