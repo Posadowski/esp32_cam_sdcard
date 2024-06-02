@@ -19,7 +19,13 @@
         "esp_log.h": "c",
         "task.h": "c",
         "camera_handler.h": "c",
-        "freertos.h": "c"
+        "freertos.h": "c",
+        "esp_system.h": "c",
+        "esp_wifi.h": "c",
+        "err.h": "c",
+        "esp_http_server.h": "c",
+        "cstdio": "c",
+        "fstream": "c"
     },
     "idf.flashType": "UART"
 }
