@@ -6,7 +6,7 @@
 
 #include "include/camera_handler.h"
 #include "include/sd_card_handler.h"
-#include "include/avi.h"
+#include "include/gwavi.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -40,6 +40,8 @@
 #define FILE_PATH "/sdcard/video.avi"
 
 static const char *TAG = "main: ";
+
+#define FILENAME_LEN 17
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
@@ -79,14 +81,30 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
     }
 
     // Otwórz plik AVI do zapisu
-    avi_file = fopen(FILE_PATH, "wb");
-    if (avi_file == NULL) {
-        ESP_LOGE(TAG, "Failed to open file for writing");
-        return ESP_FAIL;
-    }
+    // avi_file = fopen(FILE_PATH, "wb");
+    // if (avi_file == NULL) {
+    //     ESP_LOGE(TAG, "Failed to open file for writing");
+    //     return ESP_FAIL;
+    // }
 
-    // Zapisz nagłówek AVI
-    write_avi_header(avi_file);
+    /****** AVI FILE INIT ******/
+
+    struct gwavi_t *gwavi;		  /* declare main gwavi structure */
+	/*struct gwavi_audio_t audio;*/	  /* declare structure used for audio */
+	unsigned int width = 320;	  /* set video width */
+	unsigned int height = 240;	  /* set video height */
+	unsigned int fps = 3;		  /* set number of frames per second */
+	char *fourcc = "MJPG";		  /* set fourcc used */
+	char *avi_out = FILE_PATH;    /* set out file name */
+
+	struct stat frame_stat;
+	char filename[FILENAME_LEN];
+	unsigned char *buffer;
+	ssize_t r;
+	size_t count, len, buffer_len = 0;
+	int i, fd, ret;
+
+    gwavi = gwavi_open(avi_out, width, height, fourcc, fps, NULL);
 
     while(true){
         fb = esp_camera_fb_get();
@@ -118,9 +136,10 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
         if(res == ESP_OK){
             res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
         }
-        
-        // Zapisz klatkę do pliku AVI
-        write_frame(avi_file, _jpg_buf, _jpg_buf_len);
+
+        if (gwavi_add_frame(gwavi, _jpg_buf, _jpg_buf_len) == -1) {
+			ESP_LOGE(TAG,  "Cannot add frame to video\n");
+		}
 
         if(fb->format != PIXFORMAT_JPEG){
             free(_jpg_buf);
@@ -140,8 +159,11 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
     }
     last_frame = 0;
     
-    // Zamknij plik AVI
-    fclose(avi_file);
+    // close AVI dile
+    if (gwavi_close(gwavi) == -1) {
+		ESP_LOGE(TAG,  "Call to gwavi_close() failed!\n");
+		return EXIT_FAILURE;
+	}
     return res;
 }
 
