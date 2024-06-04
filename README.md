@@ -5,6 +5,8 @@
 
 This is the simple example how to use ESP32_CAM. 
 
+Code for handling avi files taken from http://bb.com https://github.com/rolinh/libgwavi/
+
 ## Prerequisites
 
 1. Set target
