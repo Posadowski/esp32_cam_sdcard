@@ -62,8 +62,6 @@ void test_sd_card_write() {
     }
 }
 
-static FILE* avi_file;
-
 esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
     camera_fb_t * fb = NULL;
     esp_err_t res = ESP_OK;
@@ -80,13 +78,6 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
         return res;
     }
 
-    // Otwórz plik AVI do zapisu
-    // avi_file = fopen(FILE_PATH, "wb");
-    // if (avi_file == NULL) {
-    //     ESP_LOGE(TAG, "Failed to open file for writing");
-    //     return ESP_FAIL;
-    // }
-
     /****** AVI FILE INIT ******/
 
     struct gwavi_t *gwavi;		  /* declare main gwavi structure */
@@ -97,15 +88,9 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req) {
 	char *fourcc = "MJPG";		  /* set fourcc used */
 	char *avi_out = FILE_PATH;    /* set out file name */
 
-	struct stat frame_stat;
-	char filename[FILENAME_LEN];
-	unsigned char *buffer;
-	ssize_t r;
-	size_t count, len, buffer_len = 0;
-	int i, fd, ret;
-
     gwavi = gwavi_open(avi_out, width, height, fourcc, fps, NULL);
 
+    /***************************/
     while(true){
         fb = esp_camera_fb_get();
         if (!fb) {
@@ -266,14 +251,7 @@ void app_main(void)
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
     wifi_init_softap();
     start_webserver();
-    char taskListBuffer[1024];
     while (1) {
-        
-        // vTaskList(taskListBuffer);
-        // printf("Task Name\t\tStatus\tPrio\tStack\tTask Number\n");
-        // printf("============================================================\n");
-        // printf("%s\n", taskListBuffer);
-        
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
