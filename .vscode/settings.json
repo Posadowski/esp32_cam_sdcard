@@ -25,7 +25,8 @@
         "err.h": "c",
         "esp_http_server.h": "c",
         "cstdio": "c",
-        "fstream": "c"
+        "fstream": "c",
+        "esp_camera.h": "c"
     },
     "idf.flashType": "UART"
 }
